@@ -5,7 +5,7 @@
 <p align="center">
   <a href="https://www.npmjs.com/package/prisma-shield"><img src="https://img.shields.io/npm/v/prisma-shield?color=6D28D9&label=npm" alt="npm version" /></a>
   <a href="https://github.com/zenmpi/prisma-shield/blob/main/LICENSE"><img src="https://img.shields.io/npm/l/prisma-shield?color=4F46E5" alt="license" /></a>
-  <img src="https://img.shields.io/badge/node-%3E%3D18-6D28D9" alt="node version" />
+  <img src="https://img.shields.io/badge/node-%3E%3D20-6D28D9" alt="node version" />
   <img src="https://img.shields.io/badge/prisma-%3E%3D5.0-4F46E5" alt="prisma version" />
 </p>
 

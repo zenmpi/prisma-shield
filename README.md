@@ -1,14 +1,40 @@
-# prisma-shield
+<p align="center">
+  <img src=".github/logo.svg" alt="Prisma Shield" width="360" />
+</p>
 
-Security layer for Prisma ORM — field-level encryption, row-level security, audit logging, and data masking. All through one declarative config, zero changes to your business logic.
+<p align="center">
+  <strong>Security layer for Prisma ORM</strong><br/>
+  Field encryption &bull; Row-level security &bull; Audit logging &bull; Data masking
+</p>
+
+<p align="center">
+  <a href="https://www.npmjs.com/package/prisma-shield"><img src="https://img.shields.io/npm/v/prisma-shield?color=6D28D9&label=npm" alt="npm version" /></a>
+  <a href="https://github.com/zenmpi/prisma-shield/blob/main/LICENSE"><img src="https://img.shields.io/npm/l/prisma-shield?color=4F46E5" alt="license" /></a>
+  <img src="https://img.shields.io/badge/node-%3E%3D18-6D28D9" alt="node version" />
+  <img src="https://img.shields.io/badge/prisma-%3E%3D5.0-4F46E5" alt="prisma version" />
+</p>
+
+---
+
+One config. Zero changes to your business logic. Drop-in `$extends` and your data is encrypted, isolated, audited, and masked.
+
+```ts
+const prisma = new PrismaClient().$extends(shield({ ... }))
+```
 
 ## Features
 
-- **Field-Level Encryption** — AES-256-GCM encryption with searchable blind indexes (HMAC-SHA256)
-- **Row-Level Security** — Automatic tenant/user isolation via where-clause injection
-- **Audit Logging** — Fire-and-forget logging of all database operations
-- **Data Masking** — Role-based field masking (full, partial, hash, custom)
-- **Key Rotation** — Helper to re-encrypt all data with new keys
+| Module | What it does |
+|--------|-------------|
+| **Encryption** | AES-256-GCM per-field encryption with searchable blind indexes (HMAC-SHA256) |
+| **Row-Level Security** | Automatic tenant/user isolation — where-clause injection on every query |
+| **Audit Logging** | Fire-and-forget operation logging with pluggable adapters |
+| **Data Masking** | Role-based field masking: `admin` sees all, `support` sees partial, `analyst` sees `********` |
+| **Key Rotation** | Re-encrypt all data when rotating keys |
+
+Each module is **optional**. Use any combination.
+
+---
 
 ## Install
 
@@ -17,6 +43,29 @@ npm install prisma-shield
 ```
 
 ## Quick Start
+
+**1. Generate keys:**
+
+```bash
+npx prisma-shield generate-keys
+# ENCRYPTION_KEY=...
+# BLIND_INDEX_KEY=...
+```
+
+**2. Add `_idx` columns** for each encrypted field:
+
+```prisma
+model User {
+  id        Int     @id @default(autoincrement())
+  email     String  // will store ciphertext
+  email_idx String? // blind index for search
+  ssn       String
+  ssn_idx   String?
+  name      String
+}
+```
+
+**3. Wrap your client:**
 
 ```ts
 import { PrismaClient } from '@prisma/client'
@@ -28,15 +77,11 @@ const prisma = new PrismaClient().$extends(
     encrypt: {
       key: process.env.ENCRYPTION_KEY!,
       blindIndexKey: process.env.BLIND_INDEX_KEY!,
-      fields: {
-        user: ['email', 'ssn'],
-      },
+      fields: { user: ['email', 'ssn'] },
     },
     rls: {
       context: () => getRequestContext(),
-      policies: {
-        user: (ctx) => ({ tenantId: ctx.tenantId }),
-      },
+      policies: { user: (ctx) => ({ tenantId: ctx.tenantId }) },
       bypassRoles: ['superadmin'],
     },
     audit: {
@@ -47,57 +92,45 @@ const prisma = new PrismaClient().$extends(
       rules: {
         user: {
           email: { admin: 'none', support: 'partial', analyst: 'full' },
-          ssn: { admin: 'partial', support: 'full', analyst: 'full' },
+          ssn:   { admin: 'partial', support: 'full', analyst: 'full' },
         },
       },
     },
   })
 )
-
-// Works exactly like normal Prisma — security is transparent
-await prisma.user.create({ data: { email: 'john@test.com', ssn: '123-45-6789', name: 'John' } })
-const user = await prisma.user.findFirst({ where: { email: 'john@test.com' } }) // blind index search
 ```
 
-Each module is optional. Use only what you need.
+**4. Use Prisma as usual** — security is transparent:
 
-## Generate Keys
+```ts
+// Data is encrypted in DB, blind index enables search
+await prisma.user.create({
+  data: { email: 'john@test.com', ssn: '123-45-6789', name: 'John' },
+})
 
-```bash
-npx prisma-shield generate-keys
+// Search works transparently via blind index
+const user = await prisma.user.findFirst({
+  where: { email: 'john@test.com' },
+})
+
+// Result is decrypted + masked based on role:
+// admin:   { email: 'john@test.com', ssn: '***-**-6789' }
+// support: { email: 'j***@test.com', ssn: '********' }
+// analyst: { email: '********',      ssn: '********' }
 ```
 
-Output:
-```
-ENCRYPTION_KEY=base64_encoded_256bit_key
-BLIND_INDEX_KEY=base64_encoded_256bit_key
-```
-
-## Schema Requirements
-
-For each encrypted field, add a `{field}_idx` column for the blind index:
-
-```prisma
-model User {
-  id        Int     @id @default(autoincrement())
-  email     String  // stores ciphertext
-  email_idx String? // blind index for search
-  ssn       String
-  ssn_idx   String?
-  name      String
-}
-```
+---
 
 ## Modules
 
 ### Encryption
 
-Encrypts fields on write, decrypts on read. Blind indexes enable exact-match search on encrypted data.
+AES-256-GCM encryption with random IV per write. HMAC-SHA256 blind indexes for searchable encrypted fields.
 
 ```ts
 encrypt: {
-  key: process.env.ENCRYPTION_KEY!,        // AES-256 key (base64)
-  blindIndexKey: process.env.BLIND_INDEX_KEY!, // HMAC key (base64)
+  key: process.env.ENCRYPTION_KEY!,
+  blindIndexKey: process.env.BLIND_INDEX_KEY!,
   fields: {
     user: ['email', 'ssn'],
     payment: ['cardNumber'],
@@ -105,14 +138,15 @@ encrypt: {
 }
 ```
 
-**How it works:**
-- Write: encrypts value → AES-256-GCM, generates `{field}_idx` → HMAC-SHA256
-- Read: decrypts ciphertext, removes `_idx` fields from response
-- Search: `where: { email: 'x' }` → `where: { email_idx: hmac('x') }`
+| Operation | What happens |
+|-----------|-------------|
+| **Write** | `email` → AES-256-GCM ciphertext, `email_idx` → HMAC-SHA256 |
+| **Read** | Ciphertext → decrypted plaintext, `_idx` fields removed |
+| **Search** | `where: { email: 'x' }` → `where: { email_idx: hmac('x') }` |
 
 ### Row-Level Security
 
-Automatically injects where-clauses based on user context.
+Every query gets a where-clause injected from your policy. Creates auto-set policy fields.
 
 ```ts
 rls: {
@@ -129,13 +163,13 @@ rls: {
 }
 ```
 
-- Reads/updates/deletes: AND-merges policy filter into `where`
-- Creates: auto-sets policy fields (e.g., `tenantId`) from context
-- Bypass: roles in `bypassRoles` skip RLS entirely
+- `findMany`, `update`, `delete` → AND-merge policy into `where`
+- `create`, `createMany` → auto-set policy fields from context
+- `bypassRoles` → skip RLS entirely for these roles
 
 ### Audit Logging
 
-Logs all write operations (and optionally reads) with fire-and-forget semantics.
+Fire-and-forget — never blocks your query, never crashes your app.
 
 ```ts
 import { consoleAdapter } from 'prisma-shield/adapters'
@@ -143,29 +177,18 @@ import { consoleAdapter } from 'prisma-shield/adapters'
 audit: {
   enabled: true,
   adapter: consoleAdapter(),
-  logReads: false,     // default: don't log reads
-  sanitize: true,      // default: replace encrypted values with [ENCRYPTED]
-  include: ['user'],   // only these models (optional)
-  exclude: ['session'], // skip these models (optional)
+  logReads: false,      // default
+  sanitize: true,       // encrypted values → [ENCRYPTED]
+  include: ['user'],    // optional: only these models
+  exclude: ['session'], // optional: skip these models
 }
 ```
 
-**Built-in adapters:**
-- `consoleAdapter()` — logs to console
-- `prismaAdapter(prismaClient)` — writes to `AuditLog` model in your database
-
-**Custom adapter:**
-```ts
-const myAdapter = {
-  log(entry) {
-    // entry: { timestamp, action, model, userId, operation, args, resultCount, duration }
-  }
-}
-```
+**Adapters:** `consoleAdapter()` | `prismaAdapter(client)` | custom `{ log(entry) {} }`
 
 ### Data Masking
 
-Role-based field masking applied after decryption.
+Role-based masking applied after decryption. Unknown roles get `'full'` mask (secure by default).
 
 ```ts
 mask: {
@@ -178,23 +201,22 @@ mask: {
 }
 ```
 
-**Strategies:**
-| Strategy | Example |
-|----------|---------|
-| `'none'` | `john@test.com` (no masking) |
+| Strategy | Output |
+|----------|--------|
+| `'none'` | `john@test.com` |
 | `'full'` | `********` |
-| `'partial'` | `j***@test.com` / `****4567` / `J***` |
-| `'hash'` | `a1b2c3d4` (SHA256 prefix) |
+| `'partial'` | `j***@test.com` / `****4567` / `***-**-6789` |
+| `'hash'` | `a1b2c3d4` (consistent SHA256 prefix) |
 | `(v) => string` | Custom function |
 
-Unknown roles default to `'full'` (secure by default).
+---
 
 ## Key Rotation
 
 ```ts
 import { rotateKeys } from 'prisma-shield'
 
-const users = await rawPrisma.user.findMany() // use non-shielded client
+const users = await rawPrisma.user.findMany()
 
 const result = rotateKeys(users, ['email', 'ssn'], {
   oldKey: process.env.OLD_ENCRYPTION_KEY!,
@@ -210,27 +232,31 @@ for (const { id, data } of result.updates) {
 console.log(`Rotated: ${result.processed}, Failed: ${result.failed}`)
 ```
 
+---
+
 ## Performance
 
-Benchmarks on 10,000 iterations:
+Benchmarks (10,000 iterations, Node.js):
 
 | Operation | Time |
 |-----------|------|
-| Encrypt (short string) | 0.011ms |
-| Decrypt (short string) | 0.006ms |
-| Blind index | 0.004ms |
-| Full round-trip (2 fields) | 0.044ms |
+| AES encrypt | 0.011ms |
+| AES decrypt | 0.006ms |
+| Blind index (HMAC) | 0.004ms |
+| Full round-trip (2 fields) | **0.044ms** |
 
-Target: < 5ms per operation.
+> Target: < 5ms per operation. Actual: **0.044ms** (113x under budget).
+
+---
 
 ## Limitations
 
-- Blind index supports **exact match only** (no `LIKE`, `contains`, range queries)
-- RLS does **not** apply to nested `include` relations
-- Encryption works with **String fields only**
-- `$queryRaw` and `$executeRaw` **bypass the pipeline**
-- Masking requires RLS context (needs `rls.context` configured)
+- Blind index: **exact match only** (no `LIKE`, `contains`, range queries)
+- RLS: **does not apply** to nested `include` relations
+- Encryption: **String fields only**
+- `$queryRaw` / `$executeRaw` **bypass the pipeline**
+- Masking requires RLS context (`rls.context` must be configured)
 
 ## License
 
-MIT
+[MIT](LICENSE)

@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 120" fill="none">
+  <defs>
+    <linearGradient id="shieldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6D28D9"/>
+      <stop offset="100%" style="stop-color:#4F46E5"/>
+    </linearGradient>
+    <linearGradient id="lockGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#A78BFA"/>
+      <stop offset="100%" style="stop-color:#7C3AED"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Shield shape -->
+  <path d="M60 12 L100 28 L100 58 C100 82 82 100 60 108 C38 100 20 82 20 58 L20 28 Z"
+        fill="url(#shieldGrad)" stroke="#4C1D95" stroke-width="2"/>
+
+  <!-- Lock icon inside shield -->
+  <rect x="48" y="54" width="24" height="20" rx="3" fill="url(#lockGrad)"/>
+  <path d="M53 54 L53 46 C53 40 56 36 60 36 C64 36 67 40 67 46 L67 54"
+        stroke="#A78BFA" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <circle cx="60" cy="65" r="3" fill="#EDE9FE"/>
+
+  <!-- Checkmark on shield top -->
+  <path d="M52 30 L58 36 L70 24" stroke="#A78BFA" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Text: Prisma -->
+  <text x="120" y="58" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="38" font-weight="300" fill="#64748B">Prisma</text>
+
+  <!-- Text: Shield -->
+  <text x="120" y="96" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="38" font-weight="700" fill="#1E1B4B">Shield</text>
+
+  <!-- Decorative dots -->
+  <circle cx="288" cy="48" r="3" fill="#A78BFA" opacity="0.4"/>
+  <circle cx="300" cy="56" r="2" fill="#6D28D9" opacity="0.3"/>
+  <circle cx="292" cy="68" r="2.5" fill="#4F46E5" opacity="0.3"/>
+</svg>

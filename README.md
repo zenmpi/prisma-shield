@@ -1,10 +1,5 @@
 <p align="center">
-  <img src=".github/logo.svg" alt="Prisma Shield" width="360" />
-</p>
-
-<p align="center">
-  <strong>Security layer for Prisma ORM</strong><br/>
-  Field encryption &bull; Row-level security &bull; Audit logging &bull; Data masking
+  <img src=".github/banner.svg" alt="Prisma Shield" width="700" />
 </p>
 
 <p align="center">

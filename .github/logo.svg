@@ -1,36 +1,93 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 120" fill="none">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 160" fill="none">
   <defs>
-    <linearGradient id="shieldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#6D28D9"/>
+    <radialGradient id="bg" cx="50%" cy="50%" r="60%">
+      <stop offset="0%" style="stop-color:#1a1035"/>
+      <stop offset="100%" style="stop-color:#0a0a12"/>
+    </radialGradient>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#7C3AED" stop-opacity="0.15"/>
+      <stop offset="100%" style="stop-color:#7C3AED" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#A78BFA"/>
+      <stop offset="50%" style="stop-color:#6D28D9"/>
       <stop offset="100%" style="stop-color:#4F46E5"/>
     </linearGradient>
-    <linearGradient id="lockGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+    <linearGradient id="shieldFill" x1="50%" y1="0%" x2="50%" y2="100%">
+      <stop offset="0%" style="stop-color:#8B5CF6" stop-opacity="0.9"/>
+      <stop offset="100%" style="stop-color:#4C1D95" stop-opacity="0.9"/>
+    </linearGradient>
+    <linearGradient id="tickGrad" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" style="stop-color:#A78BFA"/>
       <stop offset="100%" style="stop-color:#7C3AED"/>
     </linearGradient>
   </defs>
 
-  <!-- Shield shape -->
-  <path d="M60 12 L100 28 L100 58 C100 82 82 100 60 108 C38 100 20 82 20 58 L20 28 Z"
-        fill="url(#shieldGrad)" stroke="#4C1D95" stroke-width="2"/>
+  <!-- Dark background -->
+  <rect width="520" height="160" rx="16" fill="url(#bg)"/>
 
-  <!-- Lock icon inside shield -->
-  <rect x="48" y="54" width="24" height="20" rx="3" fill="url(#lockGrad)"/>
-  <path d="M53 54 L53 46 C53 40 56 36 60 36 C64 36 67 40 67 46 L67 54"
-        stroke="#A78BFA" stroke-width="3" fill="none" stroke-linecap="round"/>
-  <circle cx="60" cy="65" r="3" fill="#EDE9FE"/>
+  <!-- Subtle glow behind dial -->
+  <circle cx="80" cy="80" r="70" fill="url(#glow)"/>
 
-  <!-- Checkmark on shield top -->
-  <path d="M52 30 L58 36 L70 24" stroke="#A78BFA" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Outer ring — vault dial style -->
+  <circle cx="80" cy="80" r="52" stroke="url(#ringGrad)" stroke-width="1.5" fill="none" opacity="0.6"/>
+  <circle cx="80" cy="80" r="44" stroke="#A78BFA" stroke-width="0.5" fill="none" opacity="0.2"/>
 
-  <!-- Text: Prisma -->
-  <text x="120" y="58" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="38" font-weight="300" fill="#64748B">Prisma</text>
+  <!-- Tick marks around the dial (vault/safe style) -->
+  <g stroke="#A78BFA" stroke-width="1" opacity="0.4">
+    <!-- Major ticks every 30 degrees -->
+    <line x1="80" y1="30" x2="80" y2="36"/>
+    <line x1="106" y1="35" x2="103" y2="40.2"/>
+    <line x1="124" y1="54" x2="119.8" y2="57"/>
+    <line x1="130" y1="80" x2="124" y2="80"/>
+    <line x1="124" y1="106" x2="119.8" y2="103"/>
+    <line x1="106" y1="125" x2="103" y2="119.8"/>
+    <line x1="80" y1="130" x2="80" y2="124"/>
+    <line x1="54" y1="125" x2="57" y2="119.8"/>
+    <line x1="36" y1="106" x2="40.2" y2="103"/>
+    <line x1="30" y1="80" x2="36" y2="80"/>
+    <line x1="36" y1="54" x2="40.2" y2="57"/>
+    <line x1="54" y1="35" x2="57" y2="40.2"/>
+  </g>
 
-  <!-- Text: Shield -->
-  <text x="120" y="96" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="38" font-weight="700" fill="#1E1B4B">Shield</text>
+  <!-- Minor tick marks -->
+  <g stroke="#A78BFA" stroke-width="0.5" opacity="0.2">
+    <line x1="93" y1="30.5" x2="92" y2="35"/>
+    <line x1="67" y1="30.5" x2="68" y2="35"/>
+    <line x1="117" y1="41" x2="114" y2="45"/>
+    <line x1="119" y1="67" x2="114" y2="68"/>
+    <line x1="119" y1="93" x2="114" y2="92"/>
+    <line x1="117" y1="119" x2="114" y2="115"/>
+    <line x1="93" y1="129.5" x2="92" y2="125"/>
+    <line x1="67" y1="129.5" x2="68" y2="125"/>
+    <line x1="43" y1="119" x2="46" y2="115"/>
+    <line x1="41" y1="93" x2="46" y2="92"/>
+    <line x1="41" y1="67" x2="46" y2="68"/>
+    <line x1="43" y1="41" x2="46" y2="45"/>
+  </g>
 
-  <!-- Decorative dots -->
-  <circle cx="288" cy="48" r="3" fill="#A78BFA" opacity="0.4"/>
-  <circle cx="300" cy="56" r="2" fill="#6D28D9" opacity="0.3"/>
-  <circle cx="292" cy="68" r="2.5" fill="#4F46E5" opacity="0.3"/>
+  <!-- Shield in the center -->
+  <path d="M80 50 L100 58 L100 78 C100 94 92 104 80 110 C68 104 60 94 60 78 L60 58 Z"
+        fill="url(#shieldFill)" stroke="#A78BFA" stroke-width="1" opacity="0.9"/>
+
+  <!-- Lock keyhole in shield -->
+  <circle cx="80" cy="76" r="4" fill="#C4B5FD"/>
+  <rect x="78" y="79" width="4" height="8" rx="1" fill="#C4B5FD"/>
+
+  <!-- Dial pointer (top) -->
+  <polygon points="80,24 77,30 83,30" fill="#A78BFA" opacity="0.8"/>
+
+  <!-- Text: PRISMA -->
+  <text x="155" y="68" font-family="'SF Pro Display', 'Inter', system-ui, sans-serif" font-size="32" font-weight="300" fill="#94A3B8" letter-spacing="4">PRISMA</text>
+
+  <!-- Text: SHIELD -->
+  <text x="155" y="108" font-family="'SF Pro Display', 'Inter', system-ui, sans-serif" font-size="38" font-weight="700" fill="#E2E8F0" letter-spacing="3">SHIELD</text>
+
+  <!-- Subtle decorative line -->
+  <line x1="155" y1="76" x2="340" y2="76" stroke="#A78BFA" stroke-width="0.5" opacity="0.3"/>
+
+  <!-- Small dots accent -->
+  <circle cx="355" cy="62" r="1.5" fill="#A78BFA" opacity="0.3"/>
+  <circle cx="365" cy="68" r="1" fill="#6D28D9" opacity="0.25"/>
+  <circle cx="358" cy="100" r="1" fill="#4F46E5" opacity="0.2"/>
 </svg>

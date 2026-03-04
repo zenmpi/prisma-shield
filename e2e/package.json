@@ -1,0 +1,16 @@
+{
+  "name": "prisma-shield-e2e",
+  "private": true,
+  "scripts": {
+    "db:push": "prisma db push",
+    "test": "tsx test.ts"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.0.0",
+    "prisma-shield": "file:.."
+  },
+  "devDependencies": {
+    "prisma": "^6.0.0",
+    "tsx": "^4.0.0"
+  }
+}

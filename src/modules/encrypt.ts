@@ -106,6 +106,27 @@ export function transformWhereClause(
     }
   }
 
+  // Recurse into AND/OR/NOT for nested conditions (e.g. from RLS)
+  if (Array.isArray(result.AND)) {
+    result.AND = result.AND.map((c: Record<string, any>) =>
+      transformWhereClause(c, fields, blindIndexKey),
+    )
+  }
+  if (Array.isArray(result.OR)) {
+    result.OR = result.OR.map((c: Record<string, any>) =>
+      transformWhereClause(c, fields, blindIndexKey),
+    )
+  }
+  if (result.NOT) {
+    if (Array.isArray(result.NOT)) {
+      result.NOT = result.NOT.map((c: Record<string, any>) =>
+        transformWhereClause(c, fields, blindIndexKey),
+      )
+    } else if (typeof result.NOT === 'object') {
+      result.NOT = transformWhereClause(result.NOT, fields, blindIndexKey)
+    }
+  }
+
   return result
 }
 

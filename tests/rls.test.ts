@@ -69,26 +69,36 @@ describe('handleRls', () => {
     expect(result.args.where).toEqual({ tenantId: 'tenant-1' })
   })
 
-  it('should add where filter for update', async () => {
+  it('should add where filter for update (flat merge for unique ops)', async () => {
     const args = { where: { id: 1 }, data: { name: 'Jane' } }
     const result = await handleRls(args, 'User', 'update', rlsConfig)
 
     expect(result.args.where).toEqual({
-      AND: [{ id: 1 }, { tenantId: 'tenant-1' }],
+      id: 1,
+      tenantId: 'tenant-1',
     })
   })
 
-  it('should add where filter for delete', async () => {
+  it('should add where filter for delete (flat merge for unique ops)', async () => {
     const args = { where: { id: 1 } }
     const result = await handleRls(args, 'User', 'delete', rlsConfig)
 
     expect(result.args.where).toEqual({
-      AND: [{ id: 1 }, { tenantId: 'tenant-1' }],
+      id: 1,
+      tenantId: 'tenant-1',
     })
   })
 
   it('should auto-set policy fields on create', async () => {
     const args = { data: { name: 'John', email: 'john@test.com' } }
+    const result = await handleRls(args, 'User', 'create', rlsConfig)
+
+    expect(result.args.data.tenantId).toBe('tenant-1')
+    expect(result.args.data.name).toBe('John')
+  })
+
+  it('should enforce policy override on create even if user provides conflicting value', async () => {
+    const args = { data: { name: 'John', tenantId: 'attacker-tenant' } }
     const result = await handleRls(args, 'User', 'create', rlsConfig)
 
     expect(result.args.data.tenantId).toBe('tenant-1')
@@ -108,7 +118,7 @@ describe('handleRls', () => {
     expect(result.args.data[1].tenantId).toBe('tenant-1')
   })
 
-  it('should handle upsert — where + create', async () => {
+  it('should handle upsert — where (flat merge) + create', async () => {
     const args = {
       where: { email: 'john@test.com' },
       create: { email: 'john@test.com', name: 'John' },
@@ -117,7 +127,8 @@ describe('handleRls', () => {
     const result = await handleRls(args, 'User', 'upsert', rlsConfig)
 
     expect(result.args.where).toEqual({
-      AND: [{ email: 'john@test.com' }, { tenantId: 'tenant-1' }],
+      email: 'john@test.com',
+      tenantId: 'tenant-1',
     })
     expect(result.args.create.tenantId).toBe('tenant-1')
   })

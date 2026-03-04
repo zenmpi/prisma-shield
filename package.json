@@ -1,6 +1,6 @@
 {
   "name": "prisma-shield",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Prisma Client Extension for field encryption, row-level security, audit logging, and data masking",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
